@@ -54,12 +54,8 @@ def check_request(request):
         - error message: empty if the request is okay, error message otherwise
     """
     
-    if "observation_id" not in request:
+    if "observation_id" not in request or not isinstance(request["observation_id"], str) or request["observation_id"] == "":
         error = "Field `observation_id` missing from request: {}".format(request)
-        return False, error
-    
-    if "observation" not in request:
-        error = "Field `observation` missing from request: {}".format(request)
         return False, error
     
     return True, ""
@@ -217,7 +213,7 @@ def predict():
         return jsonify({'error': error})
 
     _id = obs_dict['observation_id']
-    observation = filter_valid_columns(obs_dict['observation'])
+    observation = filter_valid_columns({k: v for k, v in obs_dict.items() if k != 'observation_id'})
 
     columns_ok, error = check_valid_column(observation)
     if not columns_ok:
@@ -231,7 +227,7 @@ def predict():
     try:
         Prediction.create(
             observation_id=_id,
-            observation=json.dumps(obs_dict['observation']),
+            observation=observation,
             prediction=prediction
         )
     except IntegrityError:
