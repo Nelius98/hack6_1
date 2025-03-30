@@ -222,13 +222,13 @@ def predict():
     obs = pd.DataFrame([observation], columns=columns).astype(dtypes)
     prediction = pipeline.predict(obs)[0]
 
-    response = {'observation_id': _id, 'prediction': prediction}
+    response = {'observation_id': _id, 'prediction': round(prediction)}
 
     try:
         Prediction.create(
             observation_id=_id,
             observation=observation,
-            prediction=prediction
+            prediction=round(prediction)
         )
     except IntegrityError:
         response['error'] = f"Observation ID '{_id}' already exists."
